@@ -31,3 +31,18 @@ def add_product_to_recipe(request):
         recipe_product.save()
         return JsonResponse({'message': 'Product added to recipe successfully'})
     
+    
+def cook_recipe(request):
+    # Получаем объект рецепта по его id
+    recipe_id = request.GET.get('recipe_id')
+    recipe = get_object_or_404(Recipe, pk=recipe_id)
+
+    # Проходим по всем продуктам, входящим в рецепт
+    for recipe_product in recipe.recipeproduct_set.all():
+        # Увеличиваем количество приготовленных блюд на единицу
+        product = recipe_product.product
+        product.times_cooked += 1
+        product.save()
+
+    return HttpResponse('Recipe cooked successfully')
+
