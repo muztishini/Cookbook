@@ -1,10 +1,10 @@
-from django.shortcuts import get_object_or_404
-from django.http import HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404, render
+from django.http import JsonResponse
 from .models import Product, Recipe, RecipeProduct
 
 
 def index(request):
-    return HttpResponse ("<h1>Hello</h1>")
+    return JsonResponse({'message': 'Hello!!!'})
 
 
 def add_product_to_recipe(request):
@@ -44,5 +44,37 @@ def cook_recipe(request):
         product.times_cooked += 1
         product.save()
 
-    return HttpResponse('Recipe cooked successfully')
+    return JsonResponse({'message': 'Recipe cooked successfully'})
 
+
+def show_recipes_without_product(request):
+    product_id = request.GET.get('product_id')
+    print(product_id)
+
+
+    # recipes = RecipeProduct.objects.filter(product_id=product_id).all().distinct()
+    # print(recipes)
+
+
+    # recipes = Recipe.objects.exclude(recipeproduct__product_id=product_id, recipeproduct__weight__gte=10).distinct()
+    # print(recipes)
+    # for recipe in recipes:
+    #     products = recipe.recipeproduct_set.filter(product_id=product_id)
+    #     for product in products:
+    #         print(product)
+    #         if product.amount >= 10:
+    #             recipes = recipes.exclude(id=recipe.id)
+    #             break
+
+    # recipes = Recipe.objects.exclude(recipeproducts__product_id=product_id).distinct()
+    # for recipe in recipes:
+    #     recipe_products = RecipeProduct.objects.filter(recipe_id=recipe.id, product_id=product_id)
+    #     if recipe_products.exists():
+    #         recipe_product = recipe_products.first()
+    #         if recipe_product.quantity >= 10:
+    #             recipes = recipes.exclude(id=recipe.id)
+
+    recipes = Recipe.objects.exclude(recipeproduct__product_id=product_id)
+
+    data = {'recipes': recipes}
+    return render(request, "index.html", context=data)
