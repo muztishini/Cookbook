@@ -49,32 +49,15 @@ def cook_recipe(request):
 
 def show_recipes_without_product(request):
     product_id = request.GET.get('product_id')
-    print(product_id)
+    product = Product.objects.filter(id=product_id).first()
 
+    recipes_not = Recipe.objects.exclude(recipeproduct__product_id=product_id)
+    recipes_lt10 = Recipe.objects.filter(recipeproduct__weight__lt=10, recipeproduct__product_id=product_id)
 
-    # recipes = RecipeProduct.objects.filter(product_id=product_id).all().distinct()
-    # print(recipes)
+    if recipes_not:   
+        recipes = recipes_not
+    else:
+        recipes = recipes_lt10.union(recipes_not)
 
-
-    # recipes = Recipe.objects.exclude(recipeproduct__product_id=product_id, recipeproduct__weight__gte=10).distinct()
-    # print(recipes)
-    # for recipe in recipes:
-    #     products = recipe.recipeproduct_set.filter(product_id=product_id)
-    #     for product in products:
-    #         print(product)
-    #         if product.amount >= 10:
-    #             recipes = recipes.exclude(id=recipe.id)
-    #             break
-
-    # recipes = Recipe.objects.exclude(recipeproducts__product_id=product_id).distinct()
-    # for recipe in recipes:
-    #     recipe_products = RecipeProduct.objects.filter(recipe_id=recipe.id, product_id=product_id)
-    #     if recipe_products.exists():
-    #         recipe_product = recipe_products.first()
-    #         if recipe_product.quantity >= 10:
-    #             recipes = recipes.exclude(id=recipe.id)
-
-    recipes = Recipe.objects.exclude(recipeproduct__product_id=product_id)
-
-    data = {'recipes': recipes}
+    data = {'recipes': recipes, "product": product}
     return render(request, "index.html", context=data)
